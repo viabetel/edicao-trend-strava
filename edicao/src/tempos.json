@@ -55,6 +55,18 @@
       1000
     ]
   },
+  "audio": {
+    "musica": "audio/all-fine.mp3",
+    "offset": 0.0,
+    "ganhoMusica": 0.24,
+    "ganhoMusicaNoSlow": 0.1,
+    "slowSaida": [
+      2.8,
+      5.35
+    ],
+    "fadeEntrada": 0.08,
+    "fadeSaida": 0.3
+  },
   "sticker": {
     "nota": "tudo entra no primeiro quadro claro (a água cobre a lente em 33,351 s do original)",
     "origemImpacto": 33.345,
