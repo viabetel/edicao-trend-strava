@@ -1,41 +1,37 @@
 {
   "nota": "Régua única da edição (Figma: Kivow khGW4, página 01, seção 667:410). Velocidade por trechos em segundos do IMG_1977.MOV, com troca seca (sem rampa).",
   "fps": 30,
-  "quadros": 284,
+  "quadros": 298,
   "largura": 1080,
   "altura": 1920,
   "origem": {
-    "inicio": 29.8,
+    "inicio": 30.0,
     "limite": 37.45,
     "fps": 59.94
   },
   "velocidade": [
     [
-      29.8,
+      30.0,
       1
     ],
     [
-      32.433,
+      32.8,
       1
     ],
     [
-      32.433,
-      0.5
+      32.8,
+      0.25
     ],
     [
-      32.867,
-      0.5
+      33.15,
+      0.12
     ],
     [
-      32.92,
-      0.2
+      33.21,
+      0.12
     ],
     [
-      33.134,
-      0.2
-    ],
-    [
-      33.134,
+      33.21,
       1
     ],
     [
@@ -47,7 +43,7 @@
       0.5
     ],
     [
-      36.1088,
+      36.1085,
       0.5
     ]
   ],
@@ -69,19 +65,19 @@
   },
   "passos": {
     "nota": "mapa medido a 60 q/s e no som",
-    "contato1": 32.433,
-    "contato2": 32.867,
-    "ultimoNoAr": [
-      33.05,
-      33.26
-    ],
+    "pisada1": 32.433,
+    "pertoDaPoca": 32.8,
+    "pisada2": 32.867,
+    "ultimoSobe": 33.05,
+    "peNoAltoCentro": 33.201,
+    "peNoAltoTopo": 33.218,
     "ultimoPouso": 33.27,
     "aguaNaLente": 33.351
   },
-  "velocidadeNota": "pontos [origem, velocidade]; reta entre pontos; dois pontos na mesma origem = troca seca. 1x até a pisada 1; 0,5x seco na pisada 1; desce a 0,2x logo depois da pisada 2; solta seco para 1x com o último pé no ar; 0,5x para a leitura",
+  "velocidadeNota": "v5 (docs/SUPERPROMPT_v5_camera_lenta.md): 1x até 32,80; liga seco a 0,25x perto da poça; desce a 0,12x até 33,15; 0,12x até o pé no alto; solta seco para 1x em 33,21; 0,5x para a leitura a partir de 34,35",
   "interpolar": {
     "abaixoDe": 0.45,
-    "nota": "abaixo de 0,45x os quadros de origem não bastam (60 q/s): quadro intermediário por fluxo óptico (DIS)"
+    "metodo": "rife-v4.6 (ncnn, CPU, UHD); reserva DIS"
   },
   "saida": {
     "escala": 2,

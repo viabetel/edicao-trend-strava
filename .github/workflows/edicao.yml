@@ -28,6 +28,18 @@ jobs:
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
           pip install -q numpy opencv-python-headless
+      - name: RIFE (ncnn, CPU) para os quadros intermediários
+        continue-on-error: true
+        run: |
+          sudo apt-get install -y -qq libvulkan1 mesa-vulkan-drivers unzip
+          curl -sSL -o rife.zip https://github.com/nihui/rife-ncnn-vulkan/releases/download/20221029/rife-ncnn-vulkan-20221029-ubuntu.zip
+          unzip -q rife.zip -d rife
+          D=$(ls -d "$PWD"/rife/rife-ncnn-vulkan-*/ | head -1)
+          chmod +x "${D}rife-ncnn-vulkan"; ls "$D"
+          ffmpeg -v error -f lavfi -i testsrc2=s=320x568:d=0.2:r=10 -frames:v 2 rife_t%d.png
+          "${D}rife-ncnn-vulkan" -0 rife_t1.png -1 rife_t2.png -o rife_teste.png -m "${D}rife-v4.6" -s 0.3 -g -1 -u && ls -la rife_teste.png
+          echo "RIFE_BIN=${D}rife-ncnn-vulkan" >> "$GITHUB_ENV"
+          echo "RIFE_MODELO=${D}rife-v4.6" >> "$GITHUB_ENV"
       - name: Original (release "original")
         env:
           GH_TOKEN: ${{ github.token }}
@@ -43,7 +55,7 @@ jobs:
           npx tsc
           npx remotion browser ensure
           mkdir -p ../out/provas
-          for q in 0 79 105 120 135 141 142 145 148 149 150 152 156 165 180 200 240 283; do
+          for q in 0 84 92 110 130 143 150 156 158 159 160 161 162 163 164 170 192 230 297; do
             npx remotion still src/index.ts TrendPoca "../out/provas/q$(printf %03d "$q").png" --frame="$q" --log=error
           done
           npx remotion render src/index.ts TrendPoca ../out/video.mov --codec=prores --prores-profile=hq --scale=2 --concurrency=2 --log=error
@@ -54,8 +66,8 @@ jobs:
           ffmpeg -y -loglevel error -i out/video.mov -i out/audio_master.wav -map 0:v -map 1:a             -c:v libx264 -preset slow -crf 12 -profile:v high -pix_fmt yuv420p -color_primaries bt709 -color_trc bt709 -colorspace bt709             -c:a aac -b:a 320k -shortest -movflags +faststart "out/master/${N}_4K.mp4"
           ffmpeg -y -loglevel error -i "out/master/${N}_4K.mp4" -vf "scale=1080:1920:flags=lanczos" -c:v libx264 -preset slow -crf 16 -pix_fmt yuv420p -c:a copy -movflags +faststart "$D/${N}_1080_previa.mp4"
           ffmpeg -y -loglevel error -i "$D/${N}_1080_previa.mp4" -vf "fps=6,scale=180:-2,tile=10x6:padding=4:color=white" -frames:v 1 "$D/${N}_folha.jpg"
-          ffmpeg -y -loglevel error -ss 2.5 -t 3.0 -i "$D/${N}_1080_previa.mp4" -vf "fps=10,scale=216:-2,tile=10x3:padding=4:color=white" -frames:v 1 "$D/${N}_folha_camera_lenta.jpg"
-          ffmpeg -y -loglevel error -ss 4.6 -t 1.6 -i "$D/${N}_1080_previa.mp4" -vf "fps=15,scale=216:-2,tile=8x3:padding=4:color=white" -frames:v 1 "$D/${N}_folha_batida.jpg"
+          ffmpeg -y -loglevel error -ss 2.8 -t 2.6 -i "$D/${N}_1080_previa.mp4" -vf "scale=180:-2,tile=13x6:padding=4:color=white" -frames:v 1 "$D/${N}_folha_camera_lenta_todos.jpg"
+          ffmpeg -y -loglevel error -ss 5.1 -t 0.8 -i "$D/${N}_1080_previa.mp4" -vf "scale=270:-2,tile=8x3:padding=4:color=white" -frames:v 1 "$D/${N}_folha_soltura_e_batida.jpg"
           ffmpeg -hide_banner -nostats -i "out/master/${N}_4K.mp4" -af ebur128=peak=true -f null - 2>&1 | grep -E "I:|LRA:|Peak:" | tail -3 > "$D/${N}_loudness.txt" || true
           ffprobe -v error -show_entries stream=codec_name,profile,width,height,r_frame_rate,nb_frames,bit_rate:format=duration,size -of compact "out/master/${N}_4K.mp4" > "$D/${N}_ficha_4K.txt"
           mkdir -p "$D/${N}_provas" && cp out/provas/*.png "$D/${N}_provas/" && cp out/mapa_quadros.json "$D/${N}_mapa_quadros.json"

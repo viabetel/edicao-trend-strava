@@ -81,6 +81,27 @@ def intermediario(k, a):
     i1 = cv2.remap(quadro(k + 1), m(gx - (1 - a) * f10[..., 0]), m(gy - (1 - a) * f10[..., 1]), cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT)
     return cv2.addWeighted(i0, 1 - a, i1, a, 0)
 
+# quadro intermediário de qualidade máxima: RIFE v4.6 (ncnn, CPU, modo UHD) no instante exato; DIS fica de reserva
+import time
+RIFE, RIFE_MODELO = os.environ.get("RIFE_BIN"), os.environ.get("RIFE_MODELO")
+estado_rife = {"ativo": bool(RIFE and RIFE_MODELO and os.path.exists(RIFE)), "motivo": "", "seg": []}
+TMP = os.path.join(OUT, "rife"); os.makedirs(TMP, exist_ok=True)
+def intermediario_rife(k, a):
+    pa, pb, po = os.path.join(TMP, f"{k:05d}.png"), os.path.join(TMP, f"{k + 1:05d}.png"), os.path.join(TMP, "saida.png")
+    for kk, pp in ((k, pa), (k + 1, pb)):
+        if not os.path.exists(pp):
+            cv2.imwrite(pp, quadro(kk), [cv2.IMWRITE_PNG_COMPRESSION, 1])
+    if os.path.exists(po):
+        os.remove(po)
+    t0 = time.time()
+    r = subprocess.run([RIFE, "-0", pa, "-1", pb, "-o", po, "-m", RIFE_MODELO, "-s", f"{a:.4f}", "-g", "-1", "-u"],
+                       capture_output=True, text=True, timeout=900)
+    img = cv2.imread(po) if os.path.exists(po) else None
+    if r.returncode != 0 or img is None or img.shape[:2] != quadro(k).shape[:2]:
+        raise RuntimeError((r.stderr or r.stdout or "sem saída")[-600:])
+    estado_rife["seg"].append(time.time() - t0)
+    return img
+
 # 2) quadro de saída na régua, com o empurrão em volta da âncora
 enc = subprocess.Popen(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "bgr24", "-s", f"{W}x{H}", "-r", str(FPS),
                         "-i", "-", "-c:v", "libx264", "-crf", "8", "-preset", "slow", "-pix_fmt", "yuv420p",
@@ -96,7 +117,15 @@ for f in range(N):
     k, a = int(np.floor(kf)), kf - np.floor(kf)
     v = vel_de(s)
     if v < LIM_INTERP and 0.04 < a < 0.96:
-        img, modo = intermediario(k, a), "fluxo"
+        img = None
+        if estado_rife["ativo"]:
+            try:
+                img, modo = intermediario_rife(k, a), "rife"
+            except Exception as ex:
+                estado_rife["ativo"] = False; estado_rife["motivo"] = str(ex)
+                print("RIFE falhou, segue no DIS:", ex)
+        if img is None:
+            img, modo = intermediario(k, a), "fluxo"
     else:
         k = int(round(kf)); img, modo = quadro(k), "origem"
     mapa.append({"q": f, "t": round(t, 4), "origem": round(s, 4), "v": round(v, 3), "k": round(kf, 2), "modo": modo})
@@ -106,7 +135,8 @@ for f in range(N):
 enc.stdin.close()
 enc.wait()
 json.dump(mapa, open(os.path.join(OUT, "mapa_quadros.json"), "w"), indent=0)
-print("quadros por fluxo:", sum(1 for m in mapa if m["modo"] == "fluxo"))
+print("quadros por RIFE:", sum(1 for m in mapa if m["modo"] == "rife"), "· por DIS:", sum(1 for m in mapa if m["modo"] == "fluxo"),
+      "· tempo médio RIFE:", round(float(np.mean(estado_rife["seg"])), 1) if estado_rife["seg"] else "-", "s", "· motivo de reserva:", estado_rife["motivo"][:300])
 
 # 3) áudio na mesma régua, entrada de 30 ms e saída de 250 ms
 pcm = subprocess.run(["ffmpeg", "-v", "error", "-i", ORIG, "-vn", "-ac", "2", "-ar", str(SR), "-f", "f32le", "-"],
