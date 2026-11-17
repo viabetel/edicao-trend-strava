@@ -1,0 +1,3 @@
+stream|codec_name=h264|width=1080|height=1920|r_frame_rate=30/1|nb_frames=300
+stream|codec_name=aac|r_frame_rate=0/0|nb_frames=470
+format|duration=10.000000
