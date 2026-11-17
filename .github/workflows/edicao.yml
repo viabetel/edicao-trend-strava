@@ -61,20 +61,25 @@ jobs:
           npx remotion render src/index.ts TrendPoca ../out/video.mov --codec=prores --prores-profile=hq --scale=2 --concurrency=2 --log=error
       - name: Master 4K, prévia 1080, mixagem e folhas
         run: |
-          V="${{ inputs.versao }}"; [ -n "$V" ] || V="v7"; D=entregas; mkdir -p "$D" out/master; N="IMG_1977_trend_strava_${V}"
+          V="${{ inputs.versao }}"; [ -n "$V" ] || V="v8"; D=entregas; mkdir -p "$D" out/master; N="IMG_1977_trend_strava_${V}"
           MUSIC="edicao/public/$(python -c "import json; print(json.load(open('edicao/src/tempos.json'))['audio']['musica'])")"
           if [ ! -f "$MUSIC" ]; then echo "Faixa não encontrada: $MUSIC"; exit 1; fi
           DUR="$(python -c "import json; t=json.load(open('edicao/src/tempos.json')); print(t['quadros']/t['fps'])")"
-          OFFSET="$(python -c "import json; print(json.load(open('edicao/src/tempos.json'))['audio']['offset'])")"
+          OFFSET="$(python -c "import json; a=json.load(open('edicao/src/tempos.json'))['audio']; print(a['dropMusica']-a['dropVideo'])")"
           FADE_IN="$(python -c "import json; print(json.load(open('edicao/src/tempos.json'))['audio']['fadeEntrada'])")"
           FADE_OUT="$(python -c "import json; print(json.load(open('edicao/src/tempos.json'))['audio']['fadeSaida'])")"
           MUSIC_GAIN="$(python -c "import json; print(json.load(open('edicao/src/tempos.json'))['audio']['ganhoMusica'])")"
           MUSIC_SLOW_GAIN="$(python -c "import json; print(json.load(open('edicao/src/tempos.json'))['audio']['ganhoMusicaNoSlow'])")"
           SLOW_IN="$(python -c "import json; print(json.load(open('edicao/src/tempos.json'))['audio']['slowSaida'][0])")"
           SLOW_OUT="$(python -c "import json; print(json.load(open('edicao/src/tempos.json'))['audio']['slowSaida'][1])")"
+          IMPACT_IN="$(python -c "import json; print(json.load(open('edicao/src/tempos.json'))['audio']['impactoSom'][0])")"
+          IMPACT_OUT="$(python -c "import json; print(json.load(open('edicao/src/tempos.json'))['audio']['impactoSom'][1])")"
+          IMPACT_FADE_IN="$(python -c "import json; print(json.load(open('edicao/src/tempos.json'))['audio']['impactoFadeEntrada'])")"
+          IMPACT_FADE_OUT="$(python -c "import json; print(json.load(open('edicao/src/tempos.json'))['audio']['impactoFadeSaida'])")"
           FADE_START="$(python -c "print(float('$DUR')-float('$FADE_OUT'))")"
           ffmpeg -y -loglevel error -ss "$OFFSET" -i "$MUSIC" -map 0:a:0 -t "$DUR" -af "aresample=48000,afade=t=in:st=0:d=$FADE_IN,afade=t=out:st=$FADE_START:d=$FADE_OUT" -ar 48000 -ac 2 out/music.wav
-          ffmpeg -y -loglevel error -i out/audio.wav -i out/music.wav -filter_complex "[0:a]volume=1.25[amb];[1:a]volume='if(between(t,$SLOW_IN,$SLOW_OUT),$MUSIC_SLOW_GAIN,$MUSIC_GAIN)':eval=frame[mus];[amb][mus]amix=inputs=2:duration=first:dropout_transition=0:normalize=0" -ar 48000 -ac 2 out/audio_mix.wav
+          AMBIENT_FILTER="if(lt(t,$IMPACT_IN),0,if(lt(t,$IMPACT_IN+$IMPACT_FADE_IN),(t-$IMPACT_IN)/$IMPACT_FADE_IN,if(lt(t,$IMPACT_OUT-$IMPACT_FADE_OUT),1,if(lt(t,$IMPACT_OUT),($IMPACT_OUT-t)/$IMPACT_FADE_OUT,0))))"
+          ffmpeg -y -loglevel error -i out/audio.wav -i out/music.wav -filter_complex "[0:a]volume='$AMBIENT_FILTER':eval=frame[amb];[1:a]volume='if(between(t,$SLOW_IN,$SLOW_OUT),$MUSIC_SLOW_GAIN,$MUSIC_GAIN)':eval=frame[mus];[amb][mus]amix=inputs=2:duration=first:dropout_transition=0:normalize=0" -ar 48000 -ac 2 out/audio_mix.wav
           ffmpeg -hide_banner -nostats -i out/audio_mix.wav -af loudnorm=I=-14:TP=-1.5:LRA=11:print_format=json -f null - 2> out/ln1.txt
           LN=$(python -c "import json,re; t=open('out/ln1.txt').read(); d=json.loads(t[t.rindex('{'):t.rindex('}')+1]); print('measured_I=%s:measured_TP=%s:measured_LRA=%s:measured_thresh=%s:offset=%s' % (d['input_i'], d['input_tp'], d['input_lra'], d['input_thresh'], d['target_offset']))")
           ffmpeg -y -loglevel error -i out/audio_mix.wav -af "loudnorm=I=-14:TP=-1.5:LRA=11:$LN:linear=true" -ar 48000 out/audio_master.wav
@@ -92,7 +97,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          V="${{ inputs.versao }}"; [ -n "$V" ] || V="v7"
+          V="${{ inputs.versao }}"; [ -n "$V" ] || V="v8"
           gh release create "entrega-${V}" "out/master/IMG_1977_trend_strava_${V}_4K.mp4" --title "Entrega ${V} · master 4K" --notes "Master 2160 x 3840, H.264 High CRF 12, áudio AAC 320 kbps, −14 LUFS." ||           gh release upload "entrega-${V}" "out/master/IMG_1977_trend_strava_${V}_4K.mp4" --clobber
       - uses: actions/upload-artifact@v4
         if: always()

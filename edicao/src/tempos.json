@@ -57,13 +57,20 @@
   },
   "audio": {
     "musica": "audio/all-fine.mp3",
-    "offset": 0.0,
-    "ganhoMusica": 0.24,
-    "ganhoMusicaNoSlow": 0.1,
+    "dropMusica": 13.7,
+    "dropVideo": 5.35,
+    "ganhoMusica": 0.82,
+    "ganhoMusicaNoSlow": 0.82,
     "slowSaida": [
       2.8,
       5.35
     ],
+    "impactoSom": [
+      5.1,
+      5.7
+    ],
+    "impactoFadeEntrada": 0.08,
+    "impactoFadeSaida": 0.12,
     "fadeEntrada": 0.08,
     "fadeSaida": 0.3
   },
