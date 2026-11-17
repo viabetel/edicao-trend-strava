@@ -1,12 +1,12 @@
 {
   "nota": "Régua única da edição (Figma: Kivow khGW4, página 01, seção 667:410). Velocidade por trechos em segundos do IMG_1977.MOV, com troca seca (sem rampa).",
   "fps": 30,
-  "quadros": 298,
+  "quadros": 248,
   "largura": 1080,
   "altura": 1920,
   "origem": {
     "inicio": 30.0,
-    "limite": 37.45,
+    "limite": 36.1033,
     "fps": 59.94
   },
   "velocidade": [
@@ -20,15 +20,11 @@
     ],
     [
       32.8,
-      0.25
-    ],
-    [
-      33.15,
-      0.12
+      0.5
     ],
     [
       33.21,
-      0.12
+      0.5
     ],
     [
       33.21,
@@ -43,13 +39,13 @@
       0.5
     ],
     [
-      36.1085,
+      36.1033,
       0.5
     ]
   ],
   "empurrao": {
     "de": 1.0,
-    "ate": 1.06,
+    "ate": 1.04,
     "ancora": [
       540,
       1000
@@ -58,19 +54,20 @@
   "audio": {
     "musica": "audio/all-fine.mp3",
     "dropMusica": 9.8,
-    "dropVideo": 5.433,
+    "dropVideo": 3.7667,
     "ganhoMusica": 0.82,
     "ganhoMusicaNoSlow": 0.82,
     "slowSaida": [
       2.8,
-      5.35
+      2.9
     ],
     "impactoSom": [
-      5.15,
-      5.43
+      3.68,
+      3.93
     ],
-    "impactoFadeEntrada": 0.04,
-    "impactoFadeSaida": 0.1,
+    "impactoFadeEntrada": 0.02,
+    "impactoFadeSaida": 0.08,
+    "ganhoMusicaNoImpacto": 0.58,
     "fadeEntrada": 0.08,
     "fadeSaida": 0.3
   },
@@ -93,7 +90,7 @@
     "ultimoPouso": 33.27,
     "aguaNaLente": 33.351
   },
-  "velocidadeNota": "v5 (docs/SUPERPROMPT_v5_camera_lenta.md): 1x até 32,80; liga seco a 0,25x perto da poça; desce a 0,12x até 33,15; 0,12x até o pé no alto; solta seco para 1x em 33,21; 0,5x para a leitura a partir de 34,35",
+  "velocidadeNota": "v11 (docs/ROTEIRO_v11_DIRECAO.md): 1x até 32,80; 0,5x nativo de 32,80 a 33,21; solta seco no ápice; 1x até 34,35; 0,5x para leitura",
   "interpolar": {
     "abaixoDe": 0.45,
     "metodo": "rife-v4.6 (ncnn, CPU, UHD); reserva DIS"

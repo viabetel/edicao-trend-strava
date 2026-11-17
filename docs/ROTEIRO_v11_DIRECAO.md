@@ -14,7 +14,7 @@ Isso troca o movimento extremo e irregular de `0,12x` por uma desaceleração vi
 
 ## Roteiro com tempos
 
-Os tempos de saída são calculados pela velocidade proposta, a 30 q/s. Há no máximo um quadro de tolerância por arredondamento de origem.
+Os tempos de saída são calculados pela velocidade v11 aplicada ao código, a 30 q/s. Há no máximo um quadro de tolerância por arredondamento de origem.
 
 | Saída | Quadro | Origem | Imagem e ação | Som e gráfico |
 |---|---:|---:|---|---|
@@ -23,9 +23,9 @@ Os tempos de saída são calculados pela velocidade proposta, a 30 q/s. Há no m
 | 2,800–3,620 s | 84–108 | 32,800–33,210 s | A pisada em 32,867 s, a água e a subida do último pé avançam a meia velocidade. O enquadramento permanece estável; sem zoom extra durante o gesto. | A trilha sustenta a aproximação. Não adicionar sub-hit sobre o passo real. |
 | 3,620 s | 109 | 33,210 s | Soltura seca para `1x` no ápice do pé, entre o máximo do centro (33,201 s) e do topo (33,218 s). | Retorno da trilha à intensidade normal. |
 | 3,680 s | 110–112 | 33,270 s | O pé toca ao lado da lente. A água começa a subir. | O som original do contato entra no quadro do toque; ambiente abre só por 250 ms. |
-| 3,755 s | 113 | 33,345 s | Primeiro quadro claro: a água já cobriu a lente. Os dados começam a aparecer aqui, sem antecipação. | Primeira entrada vocal de “ALL FINE” no mesmo quadro. Este é o drop narrativo e o ponto de sincronismo principal. |
-| 3,755–4,755 s | 113–142 | 33,345–34,345 s | Sticker se monta em um segundo. A rota verde Kivow desenha primeiro; distância conta em seguida; ritmo e tempo entram em pares. | A voz conduz a montagem. Splash termina antes da palavra/voz ocupar a frente. |
-| 4,760–8,277 s | 143–248 | 34,350–36,108 s | Fundo molhado desacelera a `0,5x`. Manter os dados estáveis e legíveis enquanto a água se move. Encerrar antes da mão voltar a pegar o celular. | Música segue sem novos efeitos; fade de saída nos últimos 300 ms. |
+| 3,767 s | 113 | 33,356 s | Primeiro quadro de saída já claro: a água cobriu a lente. Os dados começam a aparecer aqui, sem antecipação. | Primeira entrada vocal de “ALL FINE” no mesmo quadro. Este é o drop narrativo e o ponto de sincronismo principal. |
+| 3,767–4,767 s | 113–142 | 33,356–34,356 s | Sticker se monta em um segundo. A rota verde Kivow desenha primeiro; distância conta em seguida; ritmo e tempo entram em pares. | A voz conduz a montagem. Splash termina antes da palavra/voz ocupar a frente. |
+| 4,767–8,267 s | 143–247 | 34,356–36,103 s | Fundo molhado desacelera a `0,5x`. Manter os dados estáveis e legíveis enquanto a água se move. Encerrar antes da mão voltar a pegar o celular. | Música segue sem novos efeitos; fade de saída nos últimos 300 ms. |
 
 ## Animação do sticker
 
@@ -52,7 +52,7 @@ Não usar a curva descendente `0,25x → 0,12x` nesta proposta. O quadro de 59,9
 2. Marcar o primeiro ataque vocal em amostra/tempo no MP3. Posicioná-lo em `3,755 s`, quadro 113, que é o primeiro quadro claro do sticker.
 3. Usar a parte instrumental anterior como construção da aproximação e do slow. Não fazer a voz começar antes dos dados.
 4. Abrir o som original apenas no contato em `3,680 s`; fechar em `3,930 s`. O resto do ambiente fica mutado.
-5. Se a forma de onda vocal encobrir o splash, abaixar a música em 3 dB entre `3,650–3,750 s`, retornando ao nível normal no quadro da voz.
+5. Se a forma de onda vocal encobrir o splash, abaixar a música em 3 dB entre `3,680–3,767 s`, retornando ao nível normal no quadro da voz.
 6. Não aplicar slow de fita à música. A trilha permanece em tempo e tom normais durante a câmera lenta.
 7. Master: `-14 LUFS` integrado, true peak máximo `-1,5 dBTP`, AAC estéreo 320 kb/s.
 
@@ -84,8 +84,8 @@ Não usar a curva descendente `0,25x → 0,12x` nesta proposta. O quadro de 59,9
 5. Assistir à prévia e aprovar timing, leitura e som.
 6. Só então atualizar `tempos.json`, rodar QA e renderizar o master 4K uma única vez.
 
-## Pontos ainda dependentes de confirmação material
+## Ponto de escuta antes do master
 
-- O primeiro ataque vocal usado como referência é aproximadamente 9,8 s no MP3; deve ser confirmado na escuta do trecho antes de fixar o corte definitivo.
+- O primeiro ataque vocal usado como referência é aproximadamente 9,8 s no MP3; confirmar na prévia que a sílaba começa no quadro 113. A extração automática de voz não é confiável para canto.
 - Os dados do sticker ainda são placeholders; substituir por distância, ritmo e tempo verdadeiros.
-- A mudança de duração estimada é de 9,933 s para 8,277 s. A prévia de aprovação decide se o encerramento mais curto mantém leitura suficiente.
+- A duração v11 é 8,267 s (248 quadros). A prévia decide se o encerramento mais curto mantém leitura suficiente.

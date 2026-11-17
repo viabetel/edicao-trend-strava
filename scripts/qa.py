@@ -63,7 +63,7 @@ def main():
     duracao = float(ficha["format"]["duration"])
     origem = tempos["origem"]
     passos = tempos["passos"]
-    lento = [quadro for quadro in mapa if quadro["v"] < tempos["interpolar"]["abaixoDe"]]
+    lento = [quadro for quadro in mapa if quadro["v"] < 0.999]
     metodos = {}
     for quadro in lento:
         metodos[quadro["modo"]] = metodos.get(quadro["modo"], 0) + 1
@@ -74,6 +74,10 @@ def main():
         for quadro in mapa
         if passos["peNoAltoCentro"] <= quadro["origem"] <= passos["peNoAltoTopo"]
     ]
+    if not soltura and mapa:
+        mais_proximo = min(mapa, key=lambda quadro: abs(quadro["origem"] - passos["peNoAltoCentro"]))
+        if abs(mais_proximo["origem"] - passos["peNoAltoCentro"]) <= 1 / origem["fps"]:
+            soltura = [mais_proximo]
     impacto = primeiro_momento(mapa, tempos["sticker"]["origemImpacto"])
     duracao_esperada = tempos["quadros"] / tempos["fps"]
     erros = []
@@ -103,10 +107,8 @@ def main():
         avisos.append("pico medido acima de -1 dBFS; conferir true peak")
     if not stream_audio:
         erros.append("master sem áudio")
-    if metodos.get("fluxo", 0):
-        avisos.append("há quadros de fallback por fluxo óptico no slow motion")
-    if len(lento) and metodos.get("rife", 0) / len(lento) < 0.8:
-        avisos.append("menos de 80% do slow motion usa RIFE")
+    if metodos.get("rife", 0) or metodos.get("fluxo", 0):
+        erros.append("o slow motion nativo contém quadros sintéticos")
 
     relatorio = {
         "ok": not erros,
