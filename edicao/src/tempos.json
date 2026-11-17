@@ -57,8 +57,8 @@
   },
   "audio": {
     "musica": "audio/all-fine.mp3",
-    "dropMusica": 13.7,
-    "dropVideo": 5.35,
+    "dropMusica": 9.8,
+    "dropVideo": 5.433,
     "ganhoMusica": 0.82,
     "ganhoMusicaNoSlow": 0.82,
     "slowSaida": [
@@ -66,11 +66,11 @@
       5.35
     ],
     "impactoSom": [
-      5.1,
-      5.7
+      5.15,
+      5.43
     ],
-    "impactoFadeEntrada": 0.08,
-    "impactoFadeSaida": 0.12,
+    "impactoFadeEntrada": 0.04,
+    "impactoFadeSaida": 0.1,
     "fadeEntrada": 0.08,
     "fadeSaida": 0.3
   },
