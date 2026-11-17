@@ -1,0 +1,3 @@
+stream|codec_name=h264|profile=High|width=2160|height=3840|r_frame_rate=30/1|bit_rate=124517310|nb_frames=248|
+stream|codec_name=aac|profile=LC|r_frame_rate=0/0|bit_rate=310482|nb_frames=389
+format|duration=8.266667|size=129000458
