@@ -1,0 +1,78 @@
+{
+    "programs": [
+
+    ],
+    "stream_groups": [
+
+    ],
+    "streams": [
+        {
+            "index": 0,
+            "codec_name": "hevc",
+            "profile": "Main 10",
+            "codec_type": "video",
+            "width": 3840,
+            "height": 2160,
+            "pix_fmt": "yuv420p10le",
+            "color_transfer": "arib-std-b67",
+            "color_primaries": "bt2020",
+            "r_frame_rate": "60000/1001",
+            "nb_frames": "2376",
+            "side_data_list": [
+                {
+
+                },
+                {
+                    "rotation": -90
+                },
+                {
+
+                }
+            ]
+        },
+        {
+            "index": 1,
+            "codec_name": "aac",
+            "codec_type": "audio",
+            "sample_rate": "48000",
+            "channels": 2,
+            "r_frame_rate": "0/0",
+            "nb_frames": "1860"
+        },
+        {
+            "index": 2,
+            "codec_type": "data",
+            "r_frame_rate": "0/0",
+            "nb_frames": "1"
+        },
+        {
+            "index": 3,
+            "codec_type": "data",
+            "r_frame_rate": "0/0",
+            "nb_frames": "44"
+        },
+        {
+            "index": 4,
+            "codec_type": "data",
+            "r_frame_rate": "0/0",
+            "nb_frames": "2376"
+        },
+        {
+            "index": 5,
+            "codec_type": "data",
+            "r_frame_rate": "0/0",
+            "nb_frames": "2376"
+        },
+        {
+            "index": 6,
+            "codec_type": "data",
+            "r_frame_rate": "0/0",
+            "nb_frames": "1"
+        }
+    ],
+    "format": {
+        "duration": "39.623333",
+        "size": "526837551",
+        "bit_rate": "106369153"
+    }
+}
