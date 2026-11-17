@@ -1,0 +1,59 @@
+{
+  "ok": true,
+  "erros": [],
+  "avisos": [],
+  "video": {
+    "width": 2160,
+    "height": 3840,
+    "fps": 30.0,
+    "duration": 9.9333,
+    "frames": "298",
+    "audio": true
+  },
+  "loudness": {
+    "I": -14.0,
+    "LRA": 1.4,
+    "Peak": -1.4
+  },
+  "slow_motion": {
+    "frames": 74,
+    "methods": {
+      "rife": 66,
+      "origem": 8
+    },
+    "first_frame": {
+      "q": 85,
+      "t": 2.8333,
+      "origem": 32.8083,
+      "v": 0.247,
+      "k": 174.32,
+      "modo": "rife"
+    },
+    "release_frames": [
+      {
+        "q": 157,
+        "t": 5.2333,
+        "origem": 33.2049,
+        "v": 0.12,
+        "k": 198.1,
+        "modo": "rife"
+      },
+      {
+        "q": 158,
+        "t": 5.2667,
+        "origem": 33.2089,
+        "v": 0.12,
+        "k": 198.33,
+        "modo": "rife"
+      }
+    ],
+    "sticker_frame": {
+      "q": 163,
+      "t": 5.4333,
+      "origem": 33.367,
+      "v": 1.0,
+      "k": 207.81,
+      "modo": "origem"
+    }
+  }
+}
