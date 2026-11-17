@@ -67,7 +67,7 @@ def fluxo(k):
     if k not in fluxos:
         a = cv2.cvtColor(quadro(k), cv2.COLOR_BGR2GRAY); b = cv2.cvtColor(quadro(k + 1), cv2.COLOR_BGR2GRAY)
         a2 = cv2.resize(a, (W0 // 2, H0 // 2), interpolation=cv2.INTER_AREA); b2 = cv2.resize(b, (W0 // 2, H0 // 2), interpolation=cv2.INTER_AREA)
-        up = lambda f: cv2.resize(f, (W0, H0), interpolation=cv2.INTER_LINEAR) * 2.0
+        up = lambda f: (cv2.resize(f, (W0, H0), interpolation=cv2.INTER_LINEAR) * 2.0).astype(np.float32)
         fluxos.clear()
         fluxos[k] = (up(dis.calc(a2, b2, None)), up(dis.calc(b2, a2, None)))
     return fluxos[k]
@@ -76,8 +76,9 @@ gy, gx = np.mgrid[0:H0, 0:W0].astype(np.float32)
 def intermediario(k, a):
     """quadro na fração a entre k e k+1: cada lado puxado pelo seu fluxo e misturado pelo peso da distância"""
     f01, f10 = fluxo(k)
-    i0 = cv2.remap(quadro(k), gx - a * f01[..., 0], gy - a * f01[..., 1], cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT)
-    i1 = cv2.remap(quadro(k + 1), gx - (1 - a) * f10[..., 0], gy - (1 - a) * f10[..., 1], cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT)
+    a = float(a); m = lambda x: np.ascontiguousarray(x, dtype=np.float32)
+    i0 = cv2.remap(quadro(k), m(gx - a * f01[..., 0]), m(gy - a * f01[..., 1]), cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT)
+    i1 = cv2.remap(quadro(k + 1), m(gx - (1 - a) * f10[..., 0]), m(gy - (1 - a) * f10[..., 1]), cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT)
     return cv2.addWeighted(i0, 1 - a, i1, a, 0)
 
 # 2) quadro de saída na régua, com o empurrão em volta da âncora
