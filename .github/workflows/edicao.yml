@@ -1,6 +1,9 @@
 name: Edição trend Strava · render na nuvem
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       versao:
