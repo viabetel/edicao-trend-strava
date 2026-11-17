@@ -24,14 +24,32 @@ const Peca: React.FC<{ p: { src: string; x: number; y: number; w: number; h: num
   </div>
 );
 
+// régua origem -> saída, a mesma de scripts/base.py: v(origem) em reta entre pontos, t(origem) = integral de 1/v
+const PTS = T.velocidade as [number, number][];
+const velDe = (s: number) => {
+  for (let i = 1; i < PTS.length; i++) {
+    const [sa, va] = PTS[i - 1], [sb, vb] = PTS[i];
+    if (sb > sa && s >= sa && s < sb) return va + ((vb - va) * (s - sa)) / (sb - sa);
+  }
+  return PTS[PTS.length - 1][1];
+};
+const saidaDe = (origem: number) => {
+  const passo = 1e-4;
+  let t = 0;
+  for (let s = PTS[0][0]; s < origem; s += passo) t += passo / velDe(s + passo / 2);
+  return t;
+};
+/** primeiro instante com a lente coberta: tudo entra junto aqui */
+export const T_IMPACTO = saidaDe(T.sticker.origemImpacto);
+
 const Sticker: React.FC<{ t: number }> = ({ t }) => {
-  const S = T.sticker;
-  const pTraco = sm((t - S.traco[0]) / (S.traco[1] - S.traco[0]));
-  const eConta = chegada((t - S.conta[0]) / (S.conta[1] - S.conta[0]), 3);
+  const S = T.sticker, t0 = T_IMPACTO, fim = T.quadros / T.fps;
+  const pTraco = sm((t - t0) / S.traco);
+  const eConta = chegada((t - t0) / S.conta, 3);
   const valor = (G.valor.final * eConta).toFixed(2).replace(".", ",");
-  const aNumero = chegada((t - S.conta[0]) / 0.2);
-  const ePartida = chegada((t - S.traco[0]) / 0.2);
-  const deriva = -S.deriva[2] * sm((t - S.deriva[0]) / (S.deriva[1] - S.deriva[0]));
+  const aNumero = chegada((t - t0) / 0.2);
+  const ePartida = chegada((t - t0) / 0.2);
+  const deriva = -S.deriva * sm((t - t0 - S.traco) / (fim - t0 - S.traco));
   const traco = (d: string, x: number, y: number, esc: number, sw: number, cor: string) => (
     <path d={d} transform={`translate(${x} ${y}) scale(${esc})`} fill="none" stroke={cor} strokeWidth={sw} strokeLinecap="butt" strokeLinejoin="miter"
       pathLength={1} strokeDasharray={pTraco < 1 ? `${pTraco} 1` : undefined} />
@@ -56,10 +74,10 @@ const Sticker: React.FC<{ t: number }> = ({ t }) => {
           <text x={G.unidade.x} y={G.unidade.base} fontFamily={fontFamily} fontWeight={300} fontSize={G.unidade.corpo} fill={G.tinta}>{G.unidade.texto}</text>
         </g> : null}
       </svg>
-      <Peca p={G.rotulo} estilo={entrada(t, S.rotulo)} />
-      <Peca p={G.ritmo} estilo={entrada(t, S.ritmo)} />
-      <Peca p={G.tempo} estilo={entrada(t, S.tempo)} />
-      <Peca p={G.marca} estilo={entrada(t, S.marca)} />
+      <Peca p={G.rotulo} estilo={entrada(t, t0, S.entrada)} />
+      <Peca p={G.ritmo} estilo={entrada(t, t0, S.entrada)} />
+      <Peca p={G.tempo} estilo={entrada(t, t0, S.entrada)} />
+      <Peca p={G.marca} estilo={entrada(t, t0, S.entrada)} />
     </div>
   );
 };
@@ -69,7 +87,7 @@ export const Edicao: React.FC = () => {
   return (
     <AbsoluteFill style={{ backgroundColor: "#000" }}>
       <OffthreadVideo src={staticFile("base.mp4")} muted />
-      {t >= T.sticker.rotulo ? <Sticker t={t} /> : null}
+      {t >= T_IMPACTO ? <Sticker t={t} /> : null}
     </AbsoluteFill>
   );
 };

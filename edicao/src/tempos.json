@@ -1,7 +1,7 @@
 {
-  "nota": "Régua única da edição (Figma: Kivow khGW4, página 01, seção 667:410). Tempos em segundos de saída; origem em segundos do IMG_1977.MOV.",
+  "nota": "Régua única da edição (Figma: Kivow khGW4, página 01, seção 667:410). Velocidade por trechos em segundos do IMG_1977.MOV, com troca seca (sem rampa).",
   "fps": 30,
-  "quadros": 300,
+  "quadros": 284,
   "largura": 1080,
   "altura": 1920,
   "origem": {
@@ -11,28 +11,44 @@
   },
   "velocidade": [
     [
-      0,
+      29.8,
       1
     ],
     [
-      2.5,
+      32.433,
       1
     ],
     [
-      2.9,
+      32.433,
       0.5
     ],
     [
-      4.6,
+      32.867,
       0.5
     ],
     [
-      5.0,
-      0.75
+      32.92,
+      0.2
     ],
     [
-      10,
-      0.75
+      33.134,
+      0.2
+    ],
+    [
+      33.134,
+      1
+    ],
+    [
+      34.35,
+      1
+    ],
+    [
+      34.35,
+      0.5
+    ],
+    [
+      36.1088,
+      0.5
     ]
   ],
   "empurrao": {
@@ -44,23 +60,31 @@
     ]
   },
   "sticker": {
-    "nota": "a água cobre a lente no quadro 132 (4,40 s; 33,35 s do original): tudo começa em 4,37 s para o quadro 132 já ter o sticker entrando",
-    "rotulo": 4.37,
-    "traco": [
-      4.37,
-      5.37
+    "nota": "tudo entra no primeiro quadro claro (a água cobre a lente em 33,351 s do original)",
+    "origemImpacto": 33.345,
+    "traco": 1.0,
+    "conta": 0.7,
+    "entrada": 0.4,
+    "deriva": 6
+  },
+  "passos": {
+    "nota": "mapa medido a 60 q/s e no som",
+    "contato1": 32.433,
+    "contato2": 32.867,
+    "ultimoNoAr": [
+      33.05,
+      33.26
     ],
-    "conta": [
-      4.37,
-      5.07
-    ],
-    "ritmo": 4.37,
-    "tempo": 4.37,
-    "marca": 4.37,
-    "deriva": [
-      5.37,
-      10.0,
-      6
-    ]
+    "ultimoPouso": 33.27,
+    "aguaNaLente": 33.351
+  },
+  "velocidadeNota": "pontos [origem, velocidade]; reta entre pontos; dois pontos na mesma origem = troca seca. 1x até a pisada 1; 0,5x seco na pisada 1; desce a 0,2x logo depois da pisada 2; solta seco para 1x com o último pé no ar; 0,5x para a leitura",
+  "interpolar": {
+    "abaixoDe": 0.45,
+    "nota": "abaixo de 0,45x os quadros de origem não bastam (60 q/s): quadro intermediário por fluxo óptico (DIS)"
+  },
+  "saida": {
+    "escala": 2,
+    "nota": "master em 2160 x 3840 (nativo do iPhone): base em 4K e Remotion com --scale=2"
   }
 }
