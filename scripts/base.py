@@ -86,21 +86,43 @@ import time
 RIFE, RIFE_MODELO = os.environ.get("RIFE_BIN"), os.environ.get("RIFE_MODELO")
 estado_rife = {"ativo": bool(RIFE and RIFE_MODELO and os.path.exists(RIFE)), "motivo": "", "seg": []}
 TMP = os.path.join(OUT, "rife"); os.makedirs(TMP, exist_ok=True)
+PAD = (-W0) % 64  # largura múltipla de 64: sem isso o RIFE em CPU desalinha as linhas (v5 saiu em faixas)
+def _png(k, p):
+    if not os.path.exists(p):
+        img = quadro(k)
+        if PAD:
+            img = cv2.copyMakeBorder(img, 0, 0, 0, PAD, cv2.BORDER_REFLECT)
+        cv2.imwrite(p, img, [cv2.IMWRITE_PNG_COMPRESSION, 1])
+
+def _sadio(img, k, a):
+    """quadro gerado tem que parecer com a mistura dos vizinhos reais e ter textura na horizontal (sem faixas)"""
+    p = lambda x: cv2.resize(x, (W0 // 8, H0 // 8), interpolation=cv2.INTER_AREA).astype(np.float32)
+    mix = (1 - a) * p(quadro(k)) + a * p(quadro(k + 1)); g = p(img)
+    dif = float(np.abs(g - mix).mean())
+    gx_ = lambda x: float(np.abs(np.diff(cv2.cvtColor(x.astype(np.uint8), cv2.COLOR_BGR2GRAY).astype(np.float32), axis=1)).mean())
+    textura = gx_(g) / max(1e-3, gx_(mix))
+    return dif < 22 and textura > 0.6, round(dif, 1), round(textura, 2)
+
+variantes = [["-u"], []]
 def intermediario_rife(k, a):
     pa, pb, po = os.path.join(TMP, f"{k:05d}.png"), os.path.join(TMP, f"{k + 1:05d}.png"), os.path.join(TMP, "saida.png")
-    for kk, pp in ((k, pa), (k + 1, pb)):
-        if not os.path.exists(pp):
-            cv2.imwrite(pp, quadro(kk), [cv2.IMWRITE_PNG_COMPRESSION, 1])
-    if os.path.exists(po):
-        os.remove(po)
-    t0 = time.time()
-    r = subprocess.run([RIFE, "-0", pa, "-1", pb, "-o", po, "-m", RIFE_MODELO, "-s", f"{a:.4f}", "-g", "-1", "-u"],
-                       capture_output=True, text=True, timeout=900)
-    img = cv2.imread(po) if os.path.exists(po) else None
-    if r.returncode != 0 or img is None or img.shape[:2] != quadro(k).shape[:2]:
-        raise RuntimeError((r.stderr or r.stdout or "sem saída")[-600:])
-    estado_rife["seg"].append(time.time() - t0)
-    return img
+    _png(k, pa); _png(k + 1, pb)
+    while variantes:
+        if os.path.exists(po):
+            os.remove(po)
+        t0 = time.time()
+        r = subprocess.run([RIFE, "-0", pa, "-1", pb, "-o", po, "-m", RIFE_MODELO, "-s", f"{a:.4f}", "-g", "-1"] + variantes[0],
+                           capture_output=True, text=True, timeout=900)
+        img = cv2.imread(po) if os.path.exists(po) else None
+        if img is not None and PAD:
+            img = img[:, :W0]
+        ok, dif, tex = _sadio(img, k, a) if (img is not None and img.shape[:2] == quadro(k).shape[:2]) else (False, -1, -1)
+        if r.returncode == 0 and ok:
+            estado_rife["seg"].append(time.time() - t0); estado_rife.setdefault("dif", []).append(dif)
+            return img
+        print(f"RIFE {variantes[0]} reprovado no par {k} (dif {dif}, textura {tex}, código {r.returncode}): {(r.stderr or '')[-200:]}")
+        variantes.pop(0)
+    raise RuntimeError("RIFE reprovado em todas as variantes")
 
 # 2) quadro de saída na régua, com o empurrão em volta da âncora
 enc = subprocess.Popen(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "bgr24", "-s", f"{W}x{H}", "-r", str(FPS),
@@ -136,7 +158,8 @@ enc.stdin.close()
 enc.wait()
 json.dump(mapa, open(os.path.join(OUT, "mapa_quadros.json"), "w"), indent=0)
 print("quadros por RIFE:", sum(1 for m in mapa if m["modo"] == "rife"), "· por DIS:", sum(1 for m in mapa if m["modo"] == "fluxo"),
-      "· tempo médio RIFE:", round(float(np.mean(estado_rife["seg"])), 1) if estado_rife["seg"] else "-", "s", "· motivo de reserva:", estado_rife["motivo"][:300])
+      "· tempo médio RIFE:", round(float(np.mean(estado_rife["seg"])), 1) if estado_rife["seg"] else "-", "s",
+      "· diferença média para a mistura dos vizinhos:", round(float(np.mean(estado_rife.get("dif", [0]))), 1), "· motivo de reserva:", estado_rife["motivo"][:300])
 
 # 3) áudio na mesma régua, entrada de 30 ms e saída de 250 ms
 pcm = subprocess.run(["ffmpeg", "-v", "error", "-i", ORIG, "-vn", "-ac", "2", "-ar", str(SR), "-f", "f32le", "-"],

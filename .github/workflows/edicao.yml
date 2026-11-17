@@ -62,7 +62,9 @@ jobs:
       - name: Master 4K, prévia 1080, mixagem e folhas
         run: |
           V="${{ inputs.versao }}"; D=entregas; mkdir -p "$D" out/master; N="IMG_1977_trend_strava_${V}"
-          ffmpeg -y -loglevel error -i out/audio.wav -af loudnorm=I=-14:TP=-1.5:LRA=11 -ar 48000 out/audio_master.wav
+          ffmpeg -hide_banner -nostats -i out/audio.wav -af loudnorm=I=-14:TP=-1.5:LRA=11:print_format=json -f null - 2> out/ln1.txt
+          LN=$(python -c "import json,re; t=open('out/ln1.txt').read(); d=json.loads(t[t.rindex('{'):t.rindex('}')+1]); print('measured_I=%s:measured_TP=%s:measured_LRA=%s:measured_thresh=%s:offset=%s' % (d['input_i'], d['input_tp'], d['input_lra'], d['input_thresh'], d['target_offset']))")
+          ffmpeg -y -loglevel error -i out/audio.wav -af "loudnorm=I=-14:TP=-1.5:LRA=11:$LN:linear=true" -ar 48000 out/audio_master.wav
           ffmpeg -y -loglevel error -i out/video.mov -i out/audio_master.wav -map 0:v -map 1:a             -c:v libx264 -preset slow -crf 12 -profile:v high -pix_fmt yuv420p -color_primaries bt709 -color_trc bt709 -colorspace bt709             -c:a aac -b:a 320k -shortest -movflags +faststart "out/master/${N}_4K.mp4"
           ffmpeg -y -loglevel error -i "out/master/${N}_4K.mp4" -vf "scale=1080:1920:flags=lanczos" -c:v libx264 -preset slow -crf 16 -pix_fmt yuv420p -c:a copy -movflags +faststart "$D/${N}_1080_previa.mp4"
           ffmpeg -y -loglevel error -i "$D/${N}_1080_previa.mp4" -vf "fps=6,scale=180:-2,tile=10x6:padding=4:color=white" -frames:v 1 "$D/${N}_folha.jpg"
