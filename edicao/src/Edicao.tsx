@@ -5,7 +5,7 @@ import T from "./tempos.json";
 import G from "./sticker.json";
 
 // Base (corte, rampa de velocidade e empurrão) vem pronta de scripts/base.py; aqui entra só o sticker do Kivow,
-// a variante tinta do "Minha assinatura" desenhada no Figma (coordenadas do componente 1080 x 1920).
+// o arranjo 9:16 da variante tinta do "Minha assinatura" desenhado no Figma (coordenadas do quadro 1080 x 1920).
 const { fontFamily } = loadFont("normal", { weights: ["300"], subsets: ["latin"] });
 
 const clamp = (x: number) => Math.max(0, Math.min(1, x));
@@ -32,8 +32,8 @@ const Sticker: React.FC<{ t: number }> = ({ t }) => {
   const aNumero = chegada((t - S.conta[0]) / 0.2);
   const ePartida = chegada((t - S.traco[0]) / 0.2);
   const deriva = -S.deriva[2] * sm((t - S.deriva[0]) / (S.deriva[1] - S.deriva[0]));
-  const traco = (d: string, x: number, y: number, sw: number, cor: string) => (
-    <path d={d} transform={`translate(${x} ${y})`} fill="none" stroke={cor} strokeWidth={sw} strokeLinecap="butt" strokeLinejoin="miter"
+  const traco = (d: string, x: number, y: number, esc: number, sw: number, cor: string) => (
+    <path d={d} transform={`translate(${x} ${y}) scale(${esc})`} fill="none" stroke={cor} strokeWidth={sw} strokeLinecap="butt" strokeLinejoin="miter"
       pathLength={1} strokeDasharray={pTraco < 1 ? `${pTraco} 1` : undefined} />
   );
   const quadrado = (q: { x: number; y: number; lado: number }, cor: string) => (
@@ -47,8 +47,8 @@ const Sticker: React.FC<{ t: number }> = ({ t }) => {
       <svg width={1080} height={1920} style={{ position: "absolute", left: 0, top: 0, overflow: "visible" }}>
         {pTraco > 0 ? <>
           {quadrado(G.rastroPartida, G.creme)}
-          {traco(G.rastro.d, G.rastro.x, G.rastro.y, G.rastro.sw, G.creme)}
-          {traco(G.traco.d, G.traco.x, G.traco.y, G.traco.sw, G.tinta)}
+          {traco(G.rastro.d, G.rastro.x, G.rastro.y, G.rastro.escala, G.rastro.sw, G.creme)}
+          {traco(G.traco.d, G.traco.x, G.traco.y, G.traco.escala, G.traco.sw, G.tinta)}
           {quadrado(G.partida, G.tinta)}
         </> : null}
         {aNumero > 0 ? <g opacity={aNumero} style={{ filter: aNumero < 1 ? `blur(${((1 - aNumero) * 6).toFixed(2)}px)` : undefined }}>
