@@ -1,0 +1,72 @@
+name: Edição trend Strava · render na nuvem
+
+on:
+  workflow_dispatch:
+    inputs:
+      versao:
+        description: "sufixo da entrega (ex.: v1)"
+        required: true
+        default: "v1"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: edicao
+  cancel-in-progress: false
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: ffmpeg e Python
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          pip install -q numpy opencv-python-headless
+      - name: Original (release "original")
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download original -p IMG_1977.MOV -D bruto
+      - name: Base (corte, rampa, empurrão, áudio na mesma régua)
+        run: |
+          python scripts/base.py bruto/IMG_1977.MOV edicao/src/tempos.json out
+          cp out/base.mp4 edicao/public/base.mp4
+      - name: Remotion
+        working-directory: edicao
+        run: |
+          npm install --no-audit --no-fund
+          npx tsc
+          npx remotion browser ensure
+          mkdir -p ../out/provas
+          for q in 0 75 120 138 147 150 156 162 168 174 180 186 192 200 230 299; do
+            npx remotion still src/index.ts TrendPoca "../out/provas/q$(printf %03d "$q").png" --frame="$q" --log=error
+          done
+          npx remotion render src/index.ts TrendPoca ../out/video.mp4 --crf=15 --color-space=bt709 --concurrency=2 --log=error
+      - name: Mixagem, entrega e folhas
+        run: |
+          V="${{ inputs.versao }}"; D=entregas; mkdir -p "$D"; N="IMG_1977_trend_strava_${V}"
+          ffmpeg -y -loglevel error -i out/audio.wav -af loudnorm=I=-14:TP=-1.5:LRA=11 -ar 48000 out/audio_master.wav
+          ffmpeg -y -loglevel error -i out/video.mp4 -i out/audio_master.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 256k -shortest -movflags +faststart "$D/${N}.mp4"
+          ffmpeg -y -loglevel error -i "$D/${N}.mp4" -vf "fps=6,scale=180:-2,tile=10x6:padding=4:color=white" -frames:v 1 "$D/${N}_folha.jpg"
+          ffmpeg -y -loglevel error -ss 4.6 -t 2.4 -i "$D/${N}.mp4" -vf "fps=10,scale=270:-2,tile=8x3:padding=4:color=white" -frames:v 1 "$D/${N}_folha_sticker.jpg"
+          ffmpeg -hide_banner -nostats -i "$D/${N}.mp4" -af ebur128=peak=true -f null - 2>&1 | grep -E "I:|LRA:|Peak:" | tail -3 > "$D/${N}_loudness.txt" || true
+          mkdir -p "$D/${N}_provas" && cp out/provas/*.png "$D/${N}_provas/" && cp out/mapa_quadros.json "$D/${N}_mapa_quadros.json"
+          ffprobe -v error -show_entries stream=codec_name,width,height,r_frame_rate,nb_frames:format=duration -of compact "$D/${N}.mp4" > "$D/${N}_ficha.txt"
+          ls -la "$D"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: edicao-${{ inputs.versao }}
+          path: entregas/
+      - name: Commit da entrega
+        run: |
+          git config user.name "render-nuvem"
+          git config user.email "render-nuvem@users.noreply.github.com"
+          git add entregas/
+          git commit -m "Entrega: trend Strava ${{ inputs.versao }} (GitHub Actions)" || echo "nada novo"
+          git pull --rebase -q && git push

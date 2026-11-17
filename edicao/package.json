@@ -1,0 +1,20 @@
+{
+  "name": "edicao-trend-strava",
+  "private": true,
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "tsc": "tsc"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.532",
+    "@remotion/google-fonts": "4.0.532",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "remotion": "4.0.532"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.2",
+    "@types/react": "19.2.7",
+    "typescript": "5.9.3"
+  }
+}

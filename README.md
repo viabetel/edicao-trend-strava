@@ -54,3 +54,12 @@ O trecho útil de ação tem cerca de 3,4 s (30,0 a 33,4 s). A lente molhada (33
 - os dados da corrida: print do Strava ou GPX, distância, tempo, pace e elevação;
 - a música que vai na edição;
 - o @ e o texto que entram na peça.
+
+## Edição v1 (Kivow, sticker Minha assinatura)
+
+10 s em 1080 x 1920. A corrida vem pela poça em 1x, a pisada entra em câmera lenta a 0,5x e o som desce junto. A água cobre a lente e, sobre ela, o sticker **Minha assinatura** do Kivow se monta na variante tinta: o traço se desenha a partir da partida quadrada, 8,01 km conta do zero, Ritmo e Tempo sobem e a marca K fecha.
+
+- **Figma:** arquivo do Kivow, página 01, seção "Vídeo · trend Strava · IMG_1977". A variante tinta é o componente 667:435.
+- **Régua única:** [`edicao/src/tempos.json`](edicao/src/tempos.json). Base em [`scripts/base.py`](scripts/base.py), sticker em [`edicao/src/Edicao.tsx`](edicao/src/Edicao.tsx).
+- **Render:** workflow [`edicao.yml`](.github/workflows/edicao.yml). As entregas ficam em [`entregas/`](entregas/).
+- **Dados:** são os de exemplo do modelo (8,01 km, 5:55 /km, 47min23s) até chegar o treino real.

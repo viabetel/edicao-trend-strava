@@ -1,0 +1,75 @@
+import React from "react";
+import { AbsoluteFill, Img, OffthreadVideo, staticFile, useCurrentFrame } from "remotion";
+import { loadFont } from "@remotion/google-fonts/SpaceGrotesk";
+import T from "./tempos.json";
+import G from "./sticker.json";
+
+// Base (corte, rampa de velocidade e empurrão) vem pronta de scripts/base.py; aqui entra só o sticker do Kivow,
+// a variante tinta do "Minha assinatura" desenhada no Figma (coordenadas do componente 1080 x 1920).
+const { fontFamily } = loadFont("normal", { weights: ["300"], subsets: ["latin"] });
+
+const clamp = (x: number) => Math.max(0, Math.min(1, x));
+const sm = (x: number) => { const c = clamp(x); return c * c * (3 - 2 * c); };
+const chegada = (x: number, m = 3) => 1 - Math.pow(1 - clamp(x), m);
+
+/** acende, sobe 14 px e sai de um foco de 6 px em 0,4 s */
+const entrada = (t: number, t0: number, dur = 0.4): React.CSSProperties => {
+  const e = chegada((t - t0) / dur);
+  return { opacity: e, transform: `translateY(${((1 - e) * 14).toFixed(2)}px)`, filter: e < 1 ? `blur(${((1 - e) * 6).toFixed(2)}px)` : undefined };
+};
+
+const Peca: React.FC<{ p: { src: string; x: number; y: number; w: number; h: number }; estilo: React.CSSProperties }> = ({ p, estilo }) => (
+  <div style={{ position: "absolute", left: p.x, top: p.y, width: p.w, height: p.h, ...estilo }}>
+    <Img src={staticFile(p.src)} style={{ width: p.w, height: p.h, display: "block" }} />
+  </div>
+);
+
+const Sticker: React.FC<{ t: number }> = ({ t }) => {
+  const S = T.sticker;
+  const pTraco = sm((t - S.traco[0]) / (S.traco[1] - S.traco[0]));
+  const eConta = chegada((t - S.conta[0]) / (S.conta[1] - S.conta[0]), 3);
+  const valor = (G.valor.final * eConta).toFixed(2).replace(".", ",");
+  const aNumero = chegada((t - S.conta[0]) / 0.2);
+  const ePartida = chegada((t - S.traco[0]) / 0.2);
+  const deriva = -S.deriva[2] * sm((t - S.deriva[0]) / (S.deriva[1] - S.deriva[0]));
+  const traco = (d: string, x: number, y: number, sw: number, cor: string) => (
+    <path d={d} transform={`translate(${x} ${y})`} fill="none" stroke={cor} strokeWidth={sw} strokeLinecap="butt" strokeLinejoin="miter"
+      pathLength={1} strokeDasharray={pTraco < 1 ? `${pTraco} 1` : undefined} />
+  );
+  const quadrado = (q: { x: number; y: number; lado: number }, cor: string) => (
+    <rect x={q.x} y={q.y} width={q.lado} height={q.lado} fill={cor}
+      style={{ transformBox: "fill-box", transformOrigin: "center", transform: `scale(${(0.6 + 0.4 * ePartida).toFixed(3)})` }} opacity={ePartida} />
+  );
+  const I = G.instancia;
+  return (
+    <div style={{ position: "absolute", left: 0, top: 0, width: 1080, height: 1920, transformOrigin: "0 0",
+      transform: `translate(${I.x}px, ${(I.y + deriva).toFixed(2)}px) scale(${I.escala})` }}>
+      <svg width={1080} height={1920} style={{ position: "absolute", left: 0, top: 0, overflow: "visible" }}>
+        {pTraco > 0 ? <>
+          {quadrado(G.rastroPartida, G.creme)}
+          {traco(G.rastro.d, G.rastro.x, G.rastro.y, G.rastro.sw, G.creme)}
+          {traco(G.traco.d, G.traco.x, G.traco.y, G.traco.sw, G.tinta)}
+          {quadrado(G.partida, G.tinta)}
+        </> : null}
+        {aNumero > 0 ? <g opacity={aNumero} style={{ filter: aNumero < 1 ? `blur(${((1 - aNumero) * 6).toFixed(2)}px)` : undefined }}>
+          <text x={G.valor.fimX} y={G.valor.base} textAnchor="end" fontFamily={fontFamily} fontWeight={300} fontSize={G.valor.corpo} fill={G.tinta}>{valor}</text>
+          <text x={G.unidade.x} y={G.unidade.base} fontFamily={fontFamily} fontWeight={300} fontSize={G.unidade.corpo} fill={G.tinta}>{G.unidade.texto}</text>
+        </g> : null}
+      </svg>
+      <Peca p={G.rotulo} estilo={entrada(t, S.rotulo)} />
+      <Peca p={G.ritmo} estilo={entrada(t, S.ritmo)} />
+      <Peca p={G.tempo} estilo={entrada(t, S.tempo)} />
+      <Peca p={G.marca} estilo={entrada(t, S.marca)} />
+    </div>
+  );
+};
+
+export const Edicao: React.FC = () => {
+  const t = useCurrentFrame() / T.fps;
+  return (
+    <AbsoluteFill style={{ backgroundColor: "#000" }}>
+      <OffthreadVideo src={staticFile("base.mp4")} muted />
+      {t >= T.sticker.rotulo ? <Sticker t={t} /> : null}
+    </AbsoluteFill>
+  );
+};

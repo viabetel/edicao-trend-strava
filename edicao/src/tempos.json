@@ -1,0 +1,19 @@
+{
+  "nota": "Régua única da edição (Figma: Kivow khGW4, página 01, seção 667:410). Tempos em segundos de saída; origem em segundos do IMG_1977.MOV.",
+  "fps": 30,
+  "quadros": 300,
+  "largura": 1080,
+  "altura": 1920,
+  "origem": { "inicio": 29.8, "limite": 37.45, "fps": 59.94 },
+  "velocidade": [[0, 1], [2.5, 1], [2.9, 0.5], [4.6, 0.5], [5.0, 0.75], [10, 0.75]],
+  "empurrao": { "de": 1.0, "ate": 1.06, "ancora": [540, 1000] },
+  "sticker": {
+    "rotulo": 4.9,
+    "traco": [5.0, 6.2],
+    "conta": [5.1, 5.9],
+    "ritmo": 6.0,
+    "tempo": 6.15,
+    "marca": 6.4,
+    "deriva": [6.4, 10.0, 6]
+  }
+}
