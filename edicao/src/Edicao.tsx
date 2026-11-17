@@ -66,8 +66,8 @@ const Sticker: React.FC<{ t: number }> = ({ t }) => {
         {pTraco > 0 ? <>
           {quadrado(G.rastroPartida, G.creme)}
           {traco(G.rastro.d, G.rastro.x, G.rastro.y, G.rastro.escala, G.rastro.sw, G.creme)}
-          {traco(G.traco.d, G.traco.x, G.traco.y, G.traco.escala, G.traco.sw, G.tinta)}
-          {quadrado(G.partida, G.tinta)}
+          {traco(G.traco.d, G.traco.x, G.traco.y, G.traco.escala, G.traco.sw, G.verdeKivow)}
+          {quadrado(G.partida, G.verdeKivow)}
         </> : null}
         {aNumero > 0 ? <g opacity={aNumero} style={{ filter: aNumero < 1 ? `blur(${((1 - aNumero) * 6).toFixed(2)}px)` : undefined }}>
           <text x={G.valor.fimX} y={G.valor.base} textAnchor="end" fontFamily={fontFamily} fontWeight={300} fontSize={G.valor.corpo} fill={G.tinta}>{valor}</text>

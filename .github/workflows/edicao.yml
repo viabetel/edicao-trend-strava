@@ -1,6 +1,9 @@
 name: Edição trend Strava · render na nuvem
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       versao:
@@ -61,7 +64,7 @@ jobs:
           npx remotion render src/index.ts TrendPoca ../out/video.mov --codec=prores --prores-profile=hq --scale=2 --concurrency=2 --log=error
       - name: Master 4K, prévia 1080, mixagem e folhas
         run: |
-          V="${{ inputs.versao }}"; [ -n "$V" ] || V="v8"; D=entregas; mkdir -p "$D" out/master; N="IMG_1977_trend_strava_${V}"
+          V="${{ inputs.versao }}"; [ -n "$V" ] || V="v9"; D=entregas; mkdir -p "$D" out/master; N="IMG_1977_trend_strava_${V}"
           MUSIC="edicao/public/$(python -c "import json; print(json.load(open('edicao/src/tempos.json'))['audio']['musica'])")"
           if [ ! -f "$MUSIC" ]; then echo "Faixa não encontrada: $MUSIC"; exit 1; fi
           DUR="$(python -c "import json; t=json.load(open('edicao/src/tempos.json')); print(t['quadros']/t['fps'])")"
@@ -97,7 +100,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          V="${{ inputs.versao }}"; [ -n "$V" ] || V="v8"
+          V="${{ inputs.versao }}"; [ -n "$V" ] || V="v9"
           gh release create "entrega-${V}" "out/master/IMG_1977_trend_strava_${V}_4K.mp4" --title "Entrega ${V} · master 4K" --notes "Master 2160 x 3840, H.264 High CRF 12, áudio AAC 320 kbps, −14 LUFS." ||           gh release upload "entrega-${V}" "out/master/IMG_1977_trend_strava_${V}_4K.mp4" --clobber
       - uses: actions/upload-artifact@v4
         if: always()
