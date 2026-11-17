@@ -34,7 +34,6 @@ jobs:
           mkdir -p analise
           ffprobe -v error -show_entries format=duration,size,bit_rate:stream=index,codec_type,codec_name,profile,width,height,r_frame_rate,nb_frames,pix_fmt,color_transfer,color_primaries,channels,sample_rate:stream_side_data=rotation -of json bruto/IMG_1977.MOV > analise/ficha_original.json
           python scripts/analise.py previa/IMG_1977_1080x1920.mp4 analise
-          ffmpeg -y -v error -i previa/IMG_1977_1080x1920.mp4 -filter_complex "showwavespic=s=1800x300:split_channels=1:colors=white" -frames:v 1 analise/audio_onda.png
           ffmpeg -y -v error -i previa/IMG_1977_1080x1920.mp4 -lavfi "showspectrumpic=s=1800x500:legend=1" analise/audio_espectro.png
           ffmpeg -hide_banner -nostats -i previa/IMG_1977_1080x1920.mp4 -af ebur128=peak=true -f null - 2>&1 | grep -E "I:|LRA:|Peak:" | tail -3 > analise/audio_loudness.txt || true
           ls -la analise
